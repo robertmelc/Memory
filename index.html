@@ -1322,14 +1322,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-</script>
 
 const Calendar = (() => {
   let currentYear = new Date().getFullYear();
   let currentMonth = new Date().getMonth();
 
-  const DAYS_CS = ['Po','Út','St','Čt','Pá','So','Ne'];
-  const MONTHS_CS = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+  const DAYS_CS = ['Po','Ut','St','Ct','Pa','So','Ne'];
+  const MONTHS_CS = ['Leden','Unor','Brezen','Duben','Kveten','Cerven','Cervenec','Srpen','Zari','Rijen','Listopad','Prosinec'];
+  const MONTHS_FULL = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+  const DAYS_FULL = ['Po','Út','St','Čt','Pá','So','Ne'];
 
   function render() {
     const el = document.getElementById('calendarContent');
@@ -1338,23 +1339,19 @@ const Calendar = (() => {
     const today = new Date();
     const firstDay = new Date(currentYear, currentMonth, 1);
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    // Monday-based: 0=Mon..6=Sun
-    let startDow = firstDay.getDay(); // 0=Sun
+    let startDow = firstDay.getDay();
     startDow = startDow === 0 ? 6 : startDow - 1;
 
-    // Build events map: date string -> [{type, label, color, id}]
     const events = {};
     const addEvent = (dateStr, ev) => {
       if (!events[dateStr]) events[dateStr] = [];
       events[dateStr].push(ev);
     };
 
-    // Receipts — purchase dates
     App.receipts.forEach(r => {
       if (r.purchaseDate) {
         addEvent(r.purchaseDate, { type: 'receipt', label: r.name, color: '#6c5ce7', id: r.id });
       }
-      // Warranty expiry
       const exp = Warranty.expiry(r);
       if (exp) {
         const expStr = exp.toISOString().split('T')[0];
@@ -1364,36 +1361,31 @@ const Calendar = (() => {
       }
     });
 
-    // Calendar grid
-    let grid = '';
-    // Day headers
-    grid += '<div class="cal-grid">';
-    DAYS_CS.forEach(d => { grid += `<div class="cal-dow">${d}</div>`; });
-
-    // Empty cells before first day
+    let grid = '<div class="cal-grid">';
+    DAYS_FULL.forEach(d => { grid += '<div class="cal-dow">' + d + '</div>'; });
     for (let i = 0; i < startDow; i++) grid += '<div class="cal-cell cal-empty"></div>';
 
-    // Day cells
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const mm = String(currentMonth+1).padStart(2,'0');
+      const dd = String(day).padStart(2,'0');
+      const dateStr = currentYear + '-' + mm + '-' + dd;
       const isToday = today.getFullYear()===currentYear && today.getMonth()===currentMonth && today.getDate()===day;
       const dayEvents = events[dateStr] || [];
-      const dots = dayEvents.map(e => `<div class="cal-dot" style="background:${e.color}"></div>`).join('');
+      const dots = dayEvents.map(e => '<div class="cal-dot" style="background:' + e.color + '"></div>').join('');
       const hasWarning = dayEvents.some(e => e.type==='warranty' && e.color==='#feca57');
       const hasExpired = dayEvents.some(e => e.type==='warranty' && e.color==='#ff6b6b');
       const extraClass = hasExpired ? 'cal-cell-exp' : hasWarning ? 'cal-cell-warn' : '';
-      grid += `<div class="cal-cell ${extraClass}" onclick="Calendar.showDay('${dateStr}')">
-        <div class="cal-num ${isToday ? 'cal-today' : ''}">${day}</div>
-        <div class="cal-dots">${dots}</div>
-      </div>`;
+      grid += '<div class="cal-cell ' + extraClass + '" onclick="Calendar.showDay('' + dateStr + '')">';
+      grid += '<div class="cal-num' + (isToday ? ' cal-today' : '') + '">' + day + '</div>';
+      grid += '<div class="cal-dots">' + dots + '</div>';
+      grid += '</div>';
     }
     grid += '</div>';
 
-    // Event list for current month
-    const monthStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
+    const monthStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0');
     const monthEvents = [];
     Object.entries(events).forEach(([date, evs]) => {
-      if (date.startsWith(monthStr)) evs.forEach(e => monthEvents.push({date, ...e}));
+      if (date.startsWith(monthStr)) evs.forEach(e => monthEvents.push(Object.assign({date}, e)));
     });
     monthEvents.sort((a,b) => a.date.localeCompare(b.date));
 
@@ -1403,62 +1395,53 @@ const Calendar = (() => {
       let lastDate = '';
       monthEvents.forEach(e => {
         if (e.date !== lastDate) {
-          const d = new Date(e.date + 'T12:00:00');
-          eventList += `<div class="cal-event-date">${d.getDate()}. ${MONTHS_CS[d.getMonth()]}</div>`;
+          const parts = e.date.split('-');
+          eventList += '<div class="cal-event-date">' + parseInt(parts[2]) + '. ' + MONTHS_FULL[parseInt(parts[1])-1] + '</div>';
           lastDate = e.date;
         }
         const typeLabel = e.type === 'warranty' ? 'Záruka' : 'Nákup';
-        eventList += `<div class="cal-event-item" onclick="Receipts.showDetail('${e.id}')">
-          <div class="cal-event-dot" style="background:${e.color}"></div>
-          <div>
-            <div class="cal-event-name">${e.label}</div>
-            <div class="cal-event-type">${typeLabel}</div>
-          </div>
-        </div>`;
+        eventList += '<div class="cal-event-item" onclick="Receipts.showDetail('' + e.id + '')">';
+        eventList += '<div class="cal-event-dot" style="background:' + e.color + '"></div>';
+        eventList += '<div><div class="cal-event-name">' + e.label + '</div>';
+        eventList += '<div class="cal-event-type">' + typeLabel + '</div></div></div>';
       });
       eventList += '</div>';
     } else {
       eventList = '<div class="empty">Žádné události tento měsíc</div>';
     }
 
-    el.innerHTML = `
-      <div class="cal-header">
-        <button class="cal-nav" onclick="Calendar.prev()">‹</button>
-        <div class="cal-month-title">${MONTHS_CS[currentMonth]} ${currentYear}</div>
-        <button class="cal-nav" onclick="Calendar.next()">›</button>
-      </div>
-      <div class="cal-legend">
-        <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#6c5ce7"></span>Nákup</span>
-        <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#1dd1a1"></span>Záruka OK</span>
-        <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#feca57"></span>Vyprší brzy</span>
-        <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#ff6b6b"></span>Vypršela</span>
-      </div>
-      ${grid}
-      <div style="margin-top:20px;font-size:13px;font-weight:700;color:var(--t-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Události v měsíci</div>
-      ${eventList}
-    `;
+    el.innerHTML =
+      '<div class="cal-header">' +
+        '<button class="cal-nav" onclick="Calendar.prev()">&#8249;</button>' +
+        '<div class="cal-month-title">' + MONTHS_FULL[currentMonth] + ' ' + currentYear + '</div>' +
+        '<button class="cal-nav" onclick="Calendar.next()">&#8250;</button>' +
+      '</div>' +
+      '<div class="cal-legend">' +
+        '<span class="cal-leg-item"><span class="cal-leg-dot" style="background:#6c5ce7"></span>Nákup</span>' +
+        '<span class="cal-leg-item"><span class="cal-leg-dot" style="background:#1dd1a1"></span>Záruka OK</span>' +
+        '<span class="cal-leg-item"><span class="cal-leg-dot" style="background:#feca57"></span>Vyprší brzy</span>' +
+        '<span class="cal-leg-item"><span class="cal-leg-dot" style="background:#ff6b6b"></span>Vypršela</span>' +
+      '</div>' +
+      grid +
+      '<div style="margin-top:20px;font-size:13px;font-weight:700;color:var(--t-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Události v měsíci</div>' +
+      eventList;
   }
 
   function prev() { if (currentMonth === 0) { currentMonth = 11; currentYear--; } else currentMonth--; render(); }
   function next() { if (currentMonth === 11) { currentMonth = 0; currentYear++; } else currentMonth++; render(); }
 
   function showDay(dateStr) {
-    // Find receipts for this day
     const dayReceipts = App.receipts.filter(r => r.purchaseDate === dateStr);
-    const dayWarranties = App.receipts.filter(r => {
-      const exp = Warranty.expiry(r);
-      return exp && exp.toISOString().split('T')[0] === dateStr;
-    });
+    const dayWarranties = App.receipts.filter(r => { const exp = Warranty.expiry(r); return exp && exp.toISOString().split('T')[0] === dateStr; });
     if (!dayReceipts.length && !dayWarranties.length) return;
-    if (dayReceipts.length === 1 && !dayWarranties.length) { Receipts.showDetail(dayReceipts[0].id); return; }
-    if (dayWarranties.length === 1 && !dayReceipts.length) { Receipts.showDetail(dayWarranties[0].id); return; }
-    // Multiple — show first one
     const first = dayReceipts[0] || dayWarranties[0];
     Receipts.showDetail(first.id);
   }
 
   return { render, prev, next, showDay };
 })();
+
+</script>
 
 </body>
 </html>
