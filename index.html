@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#f0eeff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="description" content="Paměť — osobní asistent pro domácnost. Účtenky, záruky, produkty." />
+  <title>Paměť</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="manifest" href="manifest.json" />
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-logo">🧠</div>
+  <h1 class="login-title">Paměť</h1>
+  <p class="login-sub">Váš osobní asistent pro domácnost</p>
+  <div class="login-form">
+    <div class="field"><label>Jméno</label><input type="text" id="loginName" placeholder="Jak vám mám říkat?" /></div>
+    <div class="field"><label>E-mail</label><input type="email" id="loginEmail" placeholder="vas@email.cz" /></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="Auth.login()">Začít používat →</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen" style="display:none">
+
+  <div class="header" id="mainHeader">
+    <h1 id="headerTitle">Účtenky</h1>
+    <div class="header-sub" id="headerSub"></div>
+  </div>
+
+  <!-- ÚČTENKY -->
+  <div class="screen active" id="screen-receipts">
+    <div id="expiryBanner"></div>
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="receiptSearch" placeholder="Klíčové slovo nebo místo..." oninput="Receipts.render()" />
+    </div>
+    <div class="filter-scroll" id="receiptFilters"></div>
+    <div id="receiptList"></div>
+    <button class="fab" onclick="Receipts.openAdd()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+
+  <!-- POLOŽKY -->
+  <div class="screen" id="screen-items">
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="itemSearch" placeholder="Hledat produkt..." oninput="Items.render()" />
+    </div>
+    <div class="filter-scroll" id="itemFilters"></div>
+    <div id="itemList"></div>
+    <button class="fab" onclick="UI.openModal('addItem')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+
+  <!-- ZÁRUKY -->
+  <div class="screen" id="screen-zaruka">
+    <div id="zarukaList"></div>
+  </div>
+
+  <!-- PROFIL -->
+  <div class="screen" id="screen-profile">
+    <div id="profileContent"></div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="UI.switchTab('receipts',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Účtenky
+    </button>
+    <button class="nav-btn" onclick="UI.switchTab('items',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Položky
+    </button>
+    <button class="nav-btn" onclick="UI.switchTab('zaruka',this)" id="zarukaTab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      Záruky
+    </button>
+    <button class="nav-btn" onclick="UI.switchTab('profile',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL: PŘIDAT ÚČTENKU -->
+<div class="modal-bg" id="modal-addReceipt">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="addReceiptTitle">Nová účtenka</h2>
+    <div class="field">
+      <label>Fotografie</label>
+      <div class="photo-upload" id="receiptPhotoBox">
+        <input type="file" accept="image/*" capture="environment" id="receiptPhotoInput" onchange="UI.previewPhoto('receiptPhotoInput','receiptPhotoBox','receiptPhotoData')" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>Vyfotit nebo vybrat</span>
+      </div>
+      <input type="hidden" id="receiptPhotoData" />
+    </div>
+    <div class="field"><label>Název / popis</label><input type="text" id="rName" placeholder="Co je na účtence?" /></div>
+    <div class="field"><label>Klíčová slova</label><input type="text" id="rKeywords" placeholder="hadice, zahrada, závlaha..." /></div>
+    <div class="field"><label>Místo uložení</label><input type="text" id="rLocation" placeholder="Krabice v garáži, police ve sklepě..." /></div>
+    <div class="field"><label>Datum nákupu</label><input type="date" id="rDate" /></div>
+    <div class="warranty-section">
+      <div class="warranty-section-title">🛡 Záruka</div>
+      <div class="field-row" style="margin-bottom:10px">
+        <div class="field" style="margin:0"><label>Délka záruky</label><input type="number" id="rWarrantyLen" placeholder="24" min="1" max="120" oninput="Receipts.updateWarrantyPreview()" /></div>
+        <div class="field" style="margin:0"><label>Jednotka</label>
+          <select id="rWarrantyUnit" onchange="Receipts.updateWarrantyPreview()">
+            <option value="months">Měsíců</option>
+            <option value="years">Roků</option>
+          </select>
+        </div>
+      </div>
+      <div class="warranty-preview" id="warrantyPreview"></div>
+    </div>
+    <div class="field"><label>Poznámka</label><textarea id="rNote" placeholder="Cokoli důležitého..."></textarea></div>
+    <input type="hidden" id="editReceiptId" />
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="UI.closeModal('addReceipt')">Zrušit</button>
+      <button class="btn btn-primary" onclick="Receipts.save()">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PŘIDAT POLOŽKU -->
+<div class="modal-bg" id="modal-addItem">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Nová položka</h2>
+    <div class="field"><label>Název produktu</label><input type="text" id="iName" placeholder="Krmivo Whiskas losos..." /></div>
+    <div class="field"><label>Kategorie</label>
+      <select id="iCat">
+        <option value="kuchyn">🍳 Kuchyň</option>
+        <option value="drogerie">🧴 Drogerie</option>
+        <option value="zahrada">🌿 Zahrada</option>
+        <option value="domacnost">🏠 Domácnost</option>
+        <option value="ostatni">📦 Ostatní</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Hodnocení (semafor)</label>
+      <div class="traffic-row">
+        <div class="light-sel" id="addTraffic">
+          <div class="light red active" onclick="Items.setLight('red')"></div>
+          <div class="light amber" onclick="Items.setLight('amber')"></div>
+          <div class="light green" onclick="Items.setLight('green')"></div>
+        </div>
+        <span class="light-lbl" id="addLightLabel" style="color:var(--c-red)">Nekupovat</span>
+      </div>
+    </div>
+    <div class="field"><label>Poznámka</label><textarea id="iNote" placeholder="Proč nekupovat / co nevyhovuje..."></textarea></div>
+    <input type="hidden" id="addLightVal" value="red" />
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="UI.closeModal('addItem')">Zrušit</button>
+      <button class="btn btn-primary" onclick="Items.save()">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETAIL ÚČTENKY -->
+<div class="modal-bg" id="modal-receiptDetail">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="receiptDetailContent"></div>
+    <div class="btn-row" id="receiptDetailBtns"></div>
+  </div>
+</div>
+
+<!-- MODAL: DETAIL POLOŽKY -->
+<div class="modal-bg" id="modal-itemDetail">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="itemDetailContent"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="UI.closeModal('itemDetail')">Zavřít</button>
+      <button class="btn btn-danger" id="itemDeleteBtn">Smazat</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+<script src="js/constants.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/warranty.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/receipts.js"></script>
+<script src="js/items.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
