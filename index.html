@@ -12,7 +12,272 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
+  <style>
+/* ============================================================
+   Paměť App — Pastel Glass Design (Apple × Revolut)
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --p-lavender:  #eae6ff;
+  --p-mint:      #d5f5ec;
+  --p-peach:     #fde8df;
+  --p-sky:       #dceefb;
+  --a-violet:    #6c5ce7;
+  --a-teal:      #00b894;
+  --a-coral:     #e17055;
+  --a-blue:      #0984e3;
+  --s-red:       #ff6b6b;
+  --s-amber:     #feca57;
+  --s-green:     #1dd1a1;
+  --t-primary:   #1a1a2e;
+  --t-secondary: #4a4a6a;
+  --t-muted:     #9898b8;
+  --glass-bg:    rgba(255,255,255,0.65);
+  --glass-bg2:   rgba(255,255,255,0.45);
+  --glass-border:rgba(255,255,255,0.85);
+  --glass-shadow:0 8px 32px rgba(108,92,231,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  --glass-shadow-sm: 0 4px 16px rgba(108,92,231,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --r: 18px; --r-sm: 12px; --r-xs: 8px;
+}
+
+body {
+  background: linear-gradient(135deg, #f0eeff 0%, #e8f5ff 35%, #fff0f8 70%, #eefff8 100%);
+  background-attachment: fixed;
+  color: var(--t-primary);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  min-height: 100vh; overflow-x: hidden; font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ''; position: fixed; top: -20%; left: -10%;
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle, rgba(108,92,231,0.12) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: ''; position: fixed; bottom: -10%; right: -10%;
+  width: 50vw; height: 50vw;
+  background: radial-gradient(circle, rgba(0,184,148,0.10) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+.nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-top: 1px solid var(--glass-border);
+  display: flex; z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 24px rgba(108,92,231,0.07);
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; padding: 10px 4px;
+  font-size: 10px; font-weight: 500; color: var(--t-muted);
+  border: none; background: none; cursor: pointer;
+  transition: color .2s, transform .15s; font-family: inherit;
+}
+.nav-btn:active { transform: scale(0.92); }
+.nav-btn.active { color: var(--a-violet); }
+.nav-btn svg { width: 22px; height: 22px; }
+
+.header {
+  padding: 56px 20px 16px;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  position: sticky; top: 0; z-index: 50;
+  border-bottom: 1px solid rgba(255,255,255,0.75);
+}
+.header h1 {
+  font-size: 26px; font-weight: 700; letter-spacing: -0.7px;
+  background: linear-gradient(120deg, var(--a-violet), var(--a-blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.header-sub { font-size: 13px; color: var(--t-secondary); margin-top: 2px; }
+
+.screen { display: none; padding: 16px 16px 100px; position: relative; z-index: 1; }
+.screen.active { display: block; }
+
+.search-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border); border-radius: var(--r);
+  padding: 11px 16px; margin-bottom: 14px; box-shadow: var(--glass-shadow-sm);
+}
+.search-bar svg { width: 18px; height: 18px; stroke: var(--t-muted); flex-shrink: 0; }
+.search-bar input { background: none; border: none; outline: none; color: var(--t-primary); font-size: 15px; flex: 1; font-family: inherit; }
+.search-bar input::placeholder { color: var(--t-muted); }
+
+.filter-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 14px; scrollbar-width: none; }
+.filter-scroll::-webkit-scrollbar { display: none; }
+.fc {
+  flex-shrink: 0; padding: 7px 16px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  background: var(--glass-bg2); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border); color: var(--t-secondary);
+  cursor: pointer; white-space: nowrap; transition: all .2s; font-family: inherit;
+}
+.fc.active { background: var(--a-violet); color: white; border-color: var(--a-violet); box-shadow: 0 4px 12px rgba(108,92,231,0.30); }
+
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(1.5); -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  border: 1px solid var(--glass-border); border-radius: var(--r);
+  padding: 14px 16px; margin-bottom: 12px; cursor: pointer;
+  transition: transform .18s, box-shadow .18s; box-shadow: var(--glass-shadow);
+}
+.card:active { transform: scale(0.98); box-shadow: var(--glass-shadow-sm); }
+.card-row { display: flex; align-items: flex-start; gap: 12px; }
+.card-thumb {
+  width: 56px; height: 56px; border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--p-lavender), var(--p-sky));
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; font-size: 22px; border: 1px solid rgba(255,255,255,0.9);
+}
+.card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.card-body { flex: 1; min-width: 0; }
+.card-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--t-primary); }
+.card-meta { font-size: 12px; color: var(--t-muted); margin-top: 3px; }
+.card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tag { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; background: rgba(108,92,231,0.08); color: var(--a-violet); border: 1px solid rgba(108,92,231,0.15); }
+.tag.loc { background: rgba(0,184,148,0.10); color: var(--a-teal); border-color: rgba(0,184,148,0.20); }
+
+.warranty-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+.wb-ok   { background: rgba(29,209,161,0.12); color: #00a381; }
+.wb-warn { background: rgba(254,202,87,0.18); color: #c9900a; }
+.wb-exp  { background: rgba(255,107,107,0.12); color: #c0392b; }
+.warranty-bar { height: 4px; border-radius: 2px; background: rgba(0,0,0,0.07); margin-top: 8px; overflow: hidden; }
+.warranty-fill { height: 100%; border-radius: 2px; transition: width .4s; }
+
+.fab {
+  position: fixed; bottom: 80px; right: 20px;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--a-violet), #a29bfe);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 24px rgba(108,92,231,0.40);
+  z-index: 90; transition: transform .15s;
+}
+.fab:active { transform: scale(0.91); }
+.fab svg { width: 24px; height: 24px; }
+
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(26,26,46,0.30); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  z-index: 200; display: none; align-items: flex-end;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(24px) saturate(1.8); -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border-radius: var(--r) var(--r) 0 0;
+  border: 1px solid var(--glass-border); border-bottom: none;
+  padding: 20px 20px 32px; width: 100%; max-height: 92vh; overflow-y: auto;
+  box-shadow: 0 -8px 40px rgba(108,92,231,0.12);
+}
+.modal-handle { width: 36px; height: 4px; background: rgba(0,0,0,0.10); border-radius: 2px; margin: 0 auto 20px; }
+.modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 18px; color: var(--t-primary); letter-spacing: -0.3px; }
+
+.field { margin-bottom: 14px; }
+.field label { font-size: 11px; color: var(--t-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 6px; }
+.field input, .field textarea, .field select {
+  width: 100%; background: rgba(255,255,255,0.75);
+  border: 1.5px solid rgba(108,92,231,0.15); border-radius: var(--r-sm);
+  padding: 12px 14px; color: var(--t-primary); font-size: 15px; font-family: inherit;
+  outline: none; transition: border-color .2s, box-shadow .2s; -webkit-appearance: none;
+}
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--a-violet); box-shadow: 0 0 0 3px rgba(108,92,231,0.12); }
+.field textarea { resize: none; height: 76px; }
+.field select option { background: white; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.btn-row { display: flex; gap: 10px; margin-top: 8px; }
+.btn { flex: 1; padding: 14px; border-radius: var(--r-sm); font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: transform .15s, box-shadow .15s; font-family: inherit; }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: linear-gradient(135deg, var(--a-violet), #a29bfe); color: white; box-shadow: 0 4px 16px rgba(108,92,231,0.30); }
+.btn-secondary { background: rgba(108,92,231,0.08); color: var(--a-violet); border: 1.5px solid rgba(108,92,231,0.15); }
+.btn-danger { background: rgba(255,107,107,0.10); color: #c0392b; border: 1.5px solid rgba(255,107,107,0.20); }
+
+.photo-upload {
+  width: 100%; aspect-ratio: 16/9;
+  background: linear-gradient(135deg, var(--p-lavender), var(--p-sky));
+  border: 2px dashed rgba(108,92,231,0.25); border-radius: var(--r-sm);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer; position: relative; overflow: hidden;
+}
+.photo-upload input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.photo-upload img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.photo-upload svg { width: 28px; height: 28px; stroke: var(--a-violet); opacity: 0.7; }
+.photo-upload span { font-size: 13px; color: var(--a-violet); font-weight: 500; }
+
+.warranty-section { background: linear-gradient(135deg,rgba(108,92,231,0.06),rgba(0,184,148,0.06)); border: 1.5px solid rgba(108,92,231,0.15); border-radius: var(--r-sm); padding: 14px; margin-bottom: 14px; }
+.warranty-section-title { font-size: 12px; color: var(--a-violet); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.warranty-preview { font-size: 12px; color: var(--a-teal); font-weight: 500; }
+
+.traffic-row { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+.light-sel { display: flex; gap: 10px; align-items: center; }
+.light { width: 32px; height: 32px; border-radius: 50%; opacity: 0.28; cursor: pointer; transition: opacity .2s, transform .2s, box-shadow .2s; }
+.light.active { opacity: 1; transform: scale(1.12); }
+.light.red   { background: var(--s-red); }
+.light.amber { background: var(--s-amber); }
+.light.green { background: var(--s-green); }
+.light.red.active   { box-shadow: 0 0 0 4px rgba(255,107,107,0.22); }
+.light.amber.active { box-shadow: 0 0 0 4px rgba(254,202,87,0.28); }
+.light.green.active { box-shadow: 0 0 0 4px rgba(29,209,161,0.22); }
+.light-lbl { font-size: 13px; color: var(--t-secondary); margin-left: 6px; font-weight: 500; }
+
+.cat-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.cat-kuchyn    { background: rgba(253,203,110,0.18); color: #b8720a; }
+.cat-drogerie  { background: rgba(0,184,148,0.12);  color: #007a61; }
+.cat-zahrada   { background: rgba(85,239,196,0.18); color: #00816e; }
+.cat-domacnost { background: rgba(225,112,85,0.12); color: #b5421a; }
+.cat-ostatni   { background: rgba(108,92,231,0.12); color: var(--a-violet); }
+
+.detail-section { margin-bottom: 16px; }
+.detail-section h3 { font-size: 11px; color: var(--t-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+.detail-val { font-size: 15px; color: var(--t-primary); }
+.detail-photo { width: 100%; max-height: 230px; object-fit: cover; border-radius: var(--r); margin-bottom: 16px; }
+
+.profile-avatar { width: 76px; height: 76px; border-radius: 50%; background: linear-gradient(135deg,var(--a-violet),var(--a-teal)); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: white; margin: 0 auto 14px; box-shadow: 0 6px 20px rgba(108,92,231,0.30); }
+.stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.stat-card { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--r-sm); padding: 14px; text-align: center; box-shadow: var(--glass-shadow-sm); }
+.stat-num { font-size: 28px; font-weight: 700; background: linear-gradient(120deg,var(--a-violet),var(--a-blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.stat-label { font-size: 12px; color: var(--t-muted); margin-top: 2px; font-weight: 500; }
+.profile-card { display: flex; align-items: center; gap: 12px; background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--r); padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: transform .15s; box-shadow: var(--glass-shadow-sm); width: 100%; font-family: inherit; text-align: left; }
+.profile-card:active { transform: scale(0.98); }
+.profile-card-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.profile-card-body strong { display: block; font-size: 15px; font-weight: 600; color: var(--t-primary); }
+.profile-card-body span { font-size: 12px; color: var(--t-muted); }
+
+.notif-banner { background: rgba(254,202,87,0.14); border: 1.5px solid rgba(254,202,87,0.38); border-radius: var(--r-sm); padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; backdrop-filter: blur(8px); }
+.notif-banner svg { width: 18px; height: 18px; stroke: #c9900a; flex-shrink: 0; margin-top: 1px; }
+.notif-banner p { font-size: 13px; color: #7a5800; line-height: 1.5; }
+.push-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.push-dot.on  { background: var(--s-green); box-shadow: 0 0 0 3px rgba(29,209,161,0.20); }
+.push-dot.off { background: var(--t-muted); }
+
+.section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.section-head h2 { font-size: 11px; font-weight: 700; color: var(--t-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+
+.login-screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; position: relative; z-index: 1; }
+.login-logo  { font-size: 56px; margin-bottom: 10px; filter: drop-shadow(0 4px 16px rgba(108,92,231,0.25)); }
+.login-title { font-size: 34px; font-weight: 700; letter-spacing: -1px; margin-bottom: 6px; background: linear-gradient(120deg,var(--a-violet),var(--a-blue)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.login-sub   { font-size: 15px; color: var(--t-secondary); margin-bottom: 36px; text-align: center; line-height: 1.5; }
+.login-form  { width: 100%; max-width: 360px; background: var(--glass-bg); backdrop-filter: blur(20px) saturate(1.8); -webkit-backdrop-filter: blur(20px) saturate(1.8); border: 1px solid var(--glass-border); border-radius: var(--r); padding: 24px 24px 20px; box-shadow: var(--glass-shadow); }
+
+.import-area { border: 2px dashed rgba(108,92,231,0.25); border-radius: var(--r-sm); padding: 20px; text-align: center; cursor: pointer; position: relative; margin-top: 8px; background: rgba(108,92,231,0.04); }
+.import-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.import-area p { font-size: 14px; color: var(--t-muted); }
+
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(16px); background: linear-gradient(135deg,var(--a-violet),#a29bfe); color: white; padding: 11px 24px; border-radius: 24px; font-size: 14px; font-weight: 600; z-index: 999; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; box-shadow: 0 4px 20px rgba(108,92,231,0.35); font-family: inherit; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.empty { text-align: center; padding: 48px 20px; color: var(--t-muted); font-size: 15px; line-height: 1.6; }
+
+  </style>
   <link rel="manifest" href="manifest.json" />
 </head>
 <body>
@@ -193,15 +458,829 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-<script src="js/constants.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/warranty.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/receipts.js"></script>
-<script src="js/items.js"></script>
-<script src="js/notifications.js"></script>
-<script src="js/profile.js"></script>
-<script src="js/app.js"></script>
+<script>
+// js/constants.js — sdílené konstanty celé aplikace
+
+const CATS = {
+  kuchyn:    '🍳 Kuchyň',
+  drogerie:  '🧴 Drogerie',
+  zahrada:   '🌿 Zahrada',
+  domacnost: '🏠 Domácnost',
+  ostatni:   '📦 Ostatní'
+};
+
+const LIGHTS = {
+  red:   { label: 'Nekupovat',     color: 'var(--c-red)'   },
+  amber: { label: 'Výjimečně',     color: 'var(--c-amber)' },
+  green: { label: 'Super produkt', color: 'var(--c-green)' }
+};
+
+const TAB_TITLES = {
+  receipts: 'Účtenky',
+  items:    'Položky',
+  zaruka:   'Záruky',
+  profile:  'Profil'
+};
+
+// js/storage.js — lokální perzistence přes localForage
+
+const Storage = (() => {
+  const key = (name) => `${name}_${App.user?.email || 'anon'}`;
+
+  async function getReceipts() {
+    return (await localforage.getItem(key('receipts'))) || [];
+  }
+  async function setReceipts(data) {
+    App.receipts = data;
+    return localforage.setItem(key('receipts'), data);
+  }
+
+  async function getItems() {
+    return (await localforage.getItem(key('items'))) || [];
+  }
+  async function setItems(data) {
+    App.items = data;
+    return localforage.setItem(key('items'), data);
+  }
+
+  async function getUser() {
+    return localforage.getItem('user');
+  }
+  async function setUser(user) {
+    return localforage.setItem('user', user);
+  }
+
+  async function getPushEnabled() {
+    return (await localforage.getItem(key('pushEnabled'))) || false;
+  }
+  async function setPushEnabled(val) {
+    return localforage.setItem(key('pushEnabled'), val);
+  }
+
+  /**
+   * Export dat — fotky jsou přiloženy jako base64.
+   * Upozornění: velké fotky mohou soubor značně zvětšit.
+   */
+  function exportJSON() {
+    const data = {
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      user: { name: App.user.name, email: App.user.email },
+      receipts: App.receipts,
+      items: App.items
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pamet-export-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Import dat — sloučí záznamy, přeskočí duplicity (podle id).
+   */
+  async function importJSON(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data.receipts && !data.items) throw new Error('Neplatný formát');
+
+          const newReceipts = (data.receipts || []).filter(r => !App.receipts.find(x => x.id === r.id));
+          const newItems    = (data.items    || []).filter(i => !App.items.find(x => x.id === i.id));
+
+          await setReceipts([...newReceipts, ...App.receipts]);
+          await setItems([...newItems, ...App.items]);
+
+          resolve({ receipts: newReceipts.length, items: newItems.length });
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error('Chyba čtení souboru'));
+      reader.readAsText(file);
+    });
+  }
+
+  return { getReceipts, setReceipts, getItems, setItems, getUser, setUser, getPushEnabled, setPushEnabled, exportJSON, importJSON };
+})();
+
+// js/warranty.js — výpočty záruční lhůty
+
+const Warranty = (() => {
+
+  function expiry(receipt) {
+    if (!receipt.purchaseDate || !receipt.warrantyLen) return null;
+    const d = new Date(receipt.purchaseDate);
+    if (receipt.warrantyUnit === 'years') {
+      d.setFullYear(d.getFullYear() + parseInt(receipt.warrantyLen));
+    } else {
+      d.setMonth(d.getMonth() + parseInt(receipt.warrantyLen));
+    }
+    return d;
+  }
+
+  function daysLeft(receipt) {
+    const exp = expiry(receipt);
+    if (!exp) return null;
+    return Math.ceil((exp - new Date()) / (1000 * 60 * 60 * 24));
+  }
+
+  function percent(receipt) {
+    const exp = expiry(receipt);
+    if (!exp || !receipt.purchaseDate) return 0;
+    const start = new Date(receipt.purchaseDate);
+    const total = exp - start;
+    const elapsed = new Date() - start;
+    return Math.min(100, Math.max(0, Math.round(elapsed / total * 100)));
+  }
+
+  function badge(receipt) {
+    const d = daysLeft(receipt);
+    if (d === null) return '';
+    if (d < 0)   return `<span class="warranty-badge wb-exp">⚠ Vypršela</span>`;
+    if (d <= 30) return `<span class="warranty-badge wb-warn">⏰ ${d} dní</span>`;
+    const months = Math.ceil(d / 30);
+    return `<span class="warranty-badge wb-ok">🛡 ${months} měs.</span>`;
+  }
+
+  function fillColor(d) {
+    if (d === null) return 'var(--c-muted)';
+    if (d < 0)     return 'var(--c-red)';
+    if (d <= 30)   return 'var(--c-amber)';
+    return 'var(--c-green)';
+  }
+
+  return { expiry, daysLeft, percent, badge, fillColor };
+})();
+
+// js/ui.js — sdílené UI pomůcky
+
+const UI = (() => {
+
+  function toast(msg, dur = 2500) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), dur);
+  }
+
+  function openModal(id)  { document.getElementById('modal-' + id).classList.add('open'); }
+  function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('screen-' + tab).classList.add('active');
+    btn.classList.add('active');
+    document.getElementById('headerTitle').textContent = TAB_TITLES[tab];
+    if (tab === 'profile') Profile.render();
+    if (tab === 'zaruka')  Warranty_Tab.render();
+  }
+
+  function previewPhoto(inputId, boxId, dataId) {
+    const file = document.getElementById(inputId).files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const box = document.getElementById(boxId);
+      let img = box.querySelector('img');
+      if (!img) { img = document.createElement('img'); box.appendChild(img); }
+      img.src = e.target.result;
+      const svg = box.querySelector('svg');
+      const span = box.querySelector('span');
+      if (svg)  svg.style.display  = 'none';
+      if (span) span.style.display = 'none';
+      document.getElementById(dataId).value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearPhotoBox(boxId) {
+    const box = document.getElementById(boxId);
+    const img  = box.querySelector('img');
+    const svg  = box.querySelector('svg');
+    const span = box.querySelector('span');
+    if (img)  img.remove();
+    if (svg)  svg.style.display  = '';
+    if (span) span.style.display = '';
+  }
+
+  return { toast, openModal, closeModal, switchTab, previewPhoto, clearPhotoBox };
+})();
+
+// js/auth.js — přihlášení / odhlášení
+
+const Auth = (() => {
+
+  async function login() {
+    const name  = document.getElementById('loginName').value.trim();
+    const email = document.getElementById('loginEmail').value.trim();
+    if (!name || !email) { UI.toast('Vyplň jméno a e-mail'); return; }
+    if (!email.includes('@')) { UI.toast('Zadej platný e-mail'); return; }
+
+    App.user = { name, email, created: Date.now() };
+    await Storage.setUser(App.user);
+    await App.boot();
+  }
+
+  async function logout() {
+    if (!confirm('Opravdu se odhlásit? Data zůstanou v prohlížeči.')) return;
+    App.user = null;
+    App.receipts = [];
+    App.items = [];
+    document.getElementById('appScreen').style.display  = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginName').value  = '';
+    document.getElementById('loginEmail').value = '';
+  }
+
+  return { login, logout };
+})();
+
+// js/receipts.js — správa účtenek
+
+const Receipts = (() => {
+  let activeFilter = '';
+
+  function buildFilters() {
+    const locs = [...new Set(App.receipts.map(r => r.location).filter(Boolean))];
+    document.getElementById('receiptFilters').innerHTML =
+      `<div class="fc active" onclick="Receipts.filter(this,'')">Vše</div>` +
+      locs.map(l => `<div class="fc" onclick="Receipts.filter(this,'${l}')">${l}</div>`).join('');
+  }
+
+  function filter(el, val) {
+    activeFilter = val;
+    document.querySelectorAll('#receiptFilters .fc').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    render();
+  }
+
+  function render() {
+    const q    = document.getElementById('receiptSearch').value.toLowerCase();
+    const list = App.receipts.filter(r => {
+      const textMatch = !q || [r.name, r.keywords, r.location, r.note].join(' ').toLowerCase().includes(q);
+      const locMatch  = !activeFilter || r.location === activeFilter;
+      return textMatch && locMatch;
+    });
+
+    const el = document.getElementById('receiptList');
+    if (!list.length) {
+      el.innerHTML = `<div class="empty">${App.receipts.length ? 'Žádné výsledky' : 'Zatím žádná účtenka.<br>Klikni + a přidej první.'}</div>`;
+      return;
+    }
+
+    el.innerHTML = list.map(r => `
+      <div class="card" onclick="Receipts.showDetail('${r.id}')">
+        <div class="card-row">
+          <div class="card-thumb">${r.photo ? `<img src="${r.photo}" alt="foto" />` : '🧾'}</div>
+          <div class="card-body">
+            <div class="card-title">${r.name}</div>
+            <div class="card-meta">${r.purchaseDate ? new Date(r.purchaseDate).toLocaleDateString('cs-CZ') : 'Datum neuvedeno'}</div>
+            <div class="card-tags">
+              ${r.keywords ? r.keywords.split(',').slice(0,2).map(k => `<span class="tag">${k.trim()}</span>`).join('') : ''}
+              ${r.location ? `<span class="tag loc">📍 ${r.location}</span>` : ''}
+              ${Warranty.badge(r)}
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  function openAdd() {
+    document.getElementById('addReceiptTitle').textContent = 'Nová účtenka';
+    document.getElementById('editReceiptId').value = '';
+    ['rName','rKeywords','rLocation','rNote','receiptPhotoData','rWarrantyLen'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('rDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('rWarrantyUnit').value = 'months';
+    document.getElementById('warrantyPreview').textContent = '';
+    UI.clearPhotoBox('receiptPhotoBox');
+    UI.openModal('addReceipt');
+  }
+
+  function updateWarrantyPreview() {
+    const len  = document.getElementById('rWarrantyLen').value;
+    const unit = document.getElementById('rWarrantyUnit').value;
+    const date = document.getElementById('rDate').value;
+    const el   = document.getElementById('warrantyPreview');
+    if (!len || !date) { el.textContent = ''; return; }
+    const d = new Date(date);
+    if (unit === 'years') d.setFullYear(d.getFullYear() + parseInt(len));
+    else d.setMonth(d.getMonth() + parseInt(len));
+    el.textContent = 'Záruka vyprší: ' + d.toLocaleDateString('cs-CZ');
+  }
+
+  async function save() {
+    const name = document.getElementById('rName').value.trim();
+    if (!name) { UI.toast('Zadej název'); return; }
+
+    const editId = document.getElementById('editReceiptId').value;
+    const r = {
+      id:           editId || Date.now().toString(),
+      name,
+      photo:        document.getElementById('receiptPhotoData').value,
+      keywords:     document.getElementById('rKeywords').value,
+      location:     document.getElementById('rLocation').value,
+      purchaseDate: document.getElementById('rDate').value,
+      warrantyLen:  document.getElementById('rWarrantyLen').value,
+      warrantyUnit: document.getElementById('rWarrantyUnit').value,
+      note:         document.getElementById('rNote').value,
+      created:      Date.now()
+    };
+
+    if (editId) {
+      App.receipts = App.receipts.map(x => x.id === editId ? r : x);
+    } else {
+      App.receipts.unshift(r);
+    }
+
+    await Storage.setReceipts(App.receipts);
+    UI.closeModal('addReceipt');
+    UI.toast('Uloženo!');
+    render(); buildFilters(); Warranty_Tab.render(); checkExpiryBanner();
+  }
+
+  function showDetail(id) {
+    const r = App.receipts.find(x => x.id === id);
+    if (!r) return;
+
+    const d   = Warranty.daysLeft(r);
+    const pct = Warranty.percent(r);
+    const fc  = Warranty.fillColor(d);
+
+    document.getElementById('receiptDetailContent').innerHTML = `
+      ${r.photo ? `<img src="${r.photo}" class="detail-photo" alt="foto účtenky" />` : ''}
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:16px">${r.name}</h2>
+      ${r.purchaseDate ? `<div class="detail-section"><h3>Datum nákupu</h3><div class="detail-val">${new Date(r.purchaseDate).toLocaleDateString('cs-CZ')}</div></div>` : ''}
+      ${r.warrantyLen ? `
+        <div class="detail-section"><h3>Záruka</h3>
+          ${Warranty.badge(r)}
+          <div style="margin-top:8px;font-size:13px;color:var(--c-muted)">Vyprší: ${Warranty.expiry(r)?.toLocaleDateString('cs-CZ') ?? '—'}</div>
+          <div class="warranty-bar"><div class="warranty-fill" style="width:${pct}%;background:${fc}"></div></div>
+        </div>` : ''}
+      ${r.keywords ? `<div class="detail-section"><h3>Klíčová slova</h3><div class="card-tags">${r.keywords.split(',').map(k => `<span class="tag">${k.trim()}</span>`).join('')}</div></div>` : ''}
+      ${r.location ? `<div class="detail-section"><h3>Místo uložení</h3><div class="detail-val" style="color:var(--c-teal)">📍 ${r.location}</div></div>` : ''}
+      ${r.note ? `<div class="detail-section"><h3>Poznámka</h3><div class="detail-val" style="color:var(--c-muted)">${r.note}</div></div>` : ''}
+    `;
+
+    document.getElementById('receiptDetailBtns').innerHTML = `
+      <button class="btn btn-danger"    onclick="Receipts.delete('${id}')">Smazat</button>
+      <button class="btn btn-secondary" onclick="Receipts.edit('${id}');UI.closeModal('receiptDetail')">Upravit</button>
+      <button class="btn btn-secondary" onclick="UI.closeModal('receiptDetail')">Zavřít</button>
+    `;
+    UI.openModal('receiptDetail');
+  }
+
+  function edit(id) {
+    const r = App.receipts.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('addReceiptTitle').textContent = 'Upravit účtenku';
+    document.getElementById('editReceiptId').value = id;
+    document.getElementById('rName').value         = r.name         || '';
+    document.getElementById('rKeywords').value     = r.keywords     || '';
+    document.getElementById('rLocation').value     = r.location     || '';
+    document.getElementById('rDate').value         = r.purchaseDate || '';
+    document.getElementById('rWarrantyLen').value  = r.warrantyLen  || '';
+    document.getElementById('rWarrantyUnit').value = r.warrantyUnit || 'months';
+    document.getElementById('rNote').value         = r.note         || '';
+    document.getElementById('receiptPhotoData').value = r.photo    || '';
+    if (r.photo) {
+      const box = document.getElementById('receiptPhotoBox');
+      let img = box.querySelector('img');
+      if (!img) { img = document.createElement('img'); box.appendChild(img); }
+      img.src = r.photo;
+      const svg = box.querySelector('svg'); const span = box.querySelector('span');
+      if (svg)  svg.style.display  = 'none';
+      if (span) span.style.display = 'none';
+    }
+    updateWarrantyPreview();
+    UI.openModal('addReceipt');
+  }
+
+  async function deleteReceipt(id) {
+    App.receipts = App.receipts.filter(r => r.id !== id);
+    await Storage.setReceipts(App.receipts);
+    UI.closeModal('receiptDetail');
+    render(); buildFilters(); Warranty_Tab.render(); checkExpiryBanner();
+    UI.toast('Smazáno');
+  }
+
+  function checkExpiryBanner() {
+    const expiring = App.receipts.filter(r => {
+      const d = Warranty.daysLeft(r);
+      return d !== null && d >= 0 && d <= 30;
+    });
+    const el = document.getElementById('expiryBanner');
+    if (!expiring.length) { el.innerHTML = ''; return; }
+    el.innerHTML = `
+      <div class="notif-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <p><strong>${expiring.length} ${expiring.length === 1 ? 'záruční lhůta vyprší' : 'záruční lhůty vyprší'} do 30 dní.</strong> Zkontroluj záložku Záruky.</p>
+      </div>`;
+  }
+
+  return { buildFilters, filter, render, openAdd, updateWarrantyPreview, save, showDetail, edit, delete: deleteReceipt, checkExpiryBanner };
+})();
+
+// Alias pro modul Záruky
+const Warranty_Tab = (() => {
+  function render() {
+    const withW = App.receipts
+      .filter(r => r.warrantyLen && r.purchaseDate)
+      .sort((a, b) => (Warranty.daysLeft(a) ?? 99999) - (Warranty.daysLeft(b) ?? 99999));
+
+    const el = document.getElementById('zarukaList');
+    if (!withW.length) {
+      el.innerHTML = `<div class="empty">Zatím žádná záruční lhůta.<br>Přidej ji při ukládání účtenky.</div>`;
+      return;
+    }
+
+    const expired  = withW.filter(r => (Warranty.daysLeft(r) ?? 1) < 0);
+    const expiring = withW.filter(r => { const d = Warranty.daysLeft(r); return d !== null && d >= 0 && d <= 30; });
+    const ok       = withW.filter(r => { const d = Warranty.daysLeft(r); return d !== null && d > 30; });
+
+    let html = '';
+    if (expiring.length) html += `<div class="section-head"><h2>⏰ Vyprší brzy</h2></div>` + expiring.map(card).join('');
+    if (ok.length)       html += `<div class="section-head" style="margin-top:${expiring.length ? 16 : 0}px"><h2>🛡 Aktivní záruky</h2></div>` + ok.map(card).join('');
+    if (expired.length)  html += `<div class="section-head" style="margin-top:${(expiring.length || ok.length) ? 16 : 0}px"><h2>❌ Vypršelé</h2></div>` + expired.map(card).join('');
+
+    el.innerHTML = html;
+
+    // Zvýrazni záložku pokud blíží expiry
+    const tab = document.getElementById('zarukaTab');
+    tab.style.color = expiring.length ? 'var(--c-amber)' : '';
+  }
+
+  function card(r) {
+    const d   = Warranty.daysLeft(r);
+    const pct = Warranty.percent(r);
+    const fc  = Warranty.fillColor(d);
+    return `
+      <div class="card" onclick="Receipts.showDetail('${r.id}')">
+        <div class="card-row">
+          <div class="card-thumb">${r.photo ? `<img src="${r.photo}" alt="foto" />` : '🧾'}</div>
+          <div class="card-body">
+            <div class="card-title">${r.name}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+              ${Warranty.badge(r)}
+              <span style="font-size:12px;color:var(--c-muted)">${Warranty.expiry(r) ? 'do ' + Warranty.expiry(r).toLocaleDateString('cs-CZ') : ''}</span>
+            </div>
+            <div class="warranty-bar"><div class="warranty-fill" style="width:${pct}%;background:${fc}"></div></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  return { render };
+})();
+
+// js/items.js — správa hodnocených produktů
+
+const Items = (() => {
+  let activeFilter = '';
+
+  function buildFilters() {
+    document.getElementById('itemFilters').innerHTML =
+      `<div class="fc active" onclick="Items.filter(this,'')">Vše</div>` +
+      Object.entries(CATS).map(([k, v]) => `<div class="fc" onclick="Items.filter(this,'${k}')">${v}</div>`).join('');
+  }
+
+  function filter(el, val) {
+    activeFilter = val;
+    document.querySelectorAll('#itemFilters .fc').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    render();
+  }
+
+  function setLight(val) {
+    document.getElementById('addLightVal').value = val;
+    document.querySelectorAll('#addTraffic .light').forEach(l => l.classList.remove('active'));
+    document.querySelector(`#addTraffic .light.${val}`).classList.add('active');
+    const lbl = document.getElementById('addLightLabel');
+    lbl.textContent  = LIGHTS[val].label;
+    lbl.style.color  = LIGHTS[val].color;
+  }
+
+  function render() {
+    const q    = document.getElementById('itemSearch').value.toLowerCase();
+    const list = App.items.filter(i => {
+      const textMatch = !q || [i.name, i.note, i.cat].join(' ').toLowerCase().includes(q);
+      return textMatch && (!activeFilter || i.cat === activeFilter);
+    });
+
+    const el = document.getElementById('itemList');
+    if (!list.length) {
+      el.innerHTML = `<div class="empty">${App.items.length ? 'Žádné výsledky' : 'Zatím žádná položka.<br>Klikni + a přidej první.'}</div>`;
+      return;
+    }
+
+    el.innerHTML = list.map(i => `
+      <div class="card" onclick="Items.showDetail('${i.id}')">
+        <div class="card-row">
+          <div style="width:6px;border-radius:3px;background:${LIGHTS[i.light]?.color || 'var(--c-muted)'};align-self:stretch;flex-shrink:0"></div>
+          <div class="card-body" style="margin-left:12px">
+            <div class="card-title">${i.name}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+              <span class="cat-pill cat-${i.cat}">${CATS[i.cat]}</span>
+              <span style="font-size:12px;color:${LIGHTS[i.light]?.color}">${LIGHTS[i.light]?.label}</span>
+            </div>
+            ${i.note ? `<div style="font-size:12px;color:var(--c-muted);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.note}</div>` : ''}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function save() {
+    const name = document.getElementById('iName').value.trim();
+    if (!name) { UI.toast('Zadej název'); return; }
+
+    App.items.unshift({
+      id:      Date.now().toString(),
+      name,
+      cat:     document.getElementById('iCat').value,
+      light:   document.getElementById('addLightVal').value,
+      note:    document.getElementById('iNote').value,
+      created: Date.now()
+    });
+
+    await Storage.setItems(App.items);
+    UI.closeModal('addItem');
+    UI.toast('Uloženo!');
+    render();
+
+    // Reset formuláře
+    ['iName','iNote'].forEach(id => document.getElementById(id).value = '');
+    setLight('red');
+  }
+
+  function showDetail(id) {
+    const i = App.items.find(x => x.id === id);
+    if (!i) return;
+
+    document.getElementById('itemDetailContent').innerHTML = `
+      <h2 style="font-size:20px;font-weight:700;margin-bottom:16px">${i.name}</h2>
+      <div class="detail-section">
+        <h3>Kategorie</h3>
+        <span class="cat-pill cat-${i.cat}">${CATS[i.cat]}</span>
+      </div>
+      <div class="detail-section">
+        <h3>Hodnocení</h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:14px;height:14px;border-radius:50%;background:${LIGHTS[i.light]?.color}"></div>
+          <span style="font-size:16px;font-weight:600;color:${LIGHTS[i.light]?.color}">${LIGHTS[i.light]?.label}</span>
+        </div>
+      </div>
+      ${i.note ? `<div class="detail-section"><h3>Poznámka</h3><div class="detail-val" style="color:var(--c-muted)">${i.note}</div></div>` : ''}
+    `;
+
+    document.getElementById('itemDeleteBtn').onclick = () => deleteItem(id);
+    UI.openModal('itemDetail');
+  }
+
+  async function deleteItem(id) {
+    App.items = App.items.filter(i => i.id !== id);
+    await Storage.setItems(App.items);
+    UI.closeModal('itemDetail');
+    render();
+    Profile.render();
+    UI.toast('Smazáno');
+  }
+
+  return { buildFilters, filter, setLight, render, save, showDetail };
+})();
+
+// js/notifications.js — push notifikace pro záruční lhůty
+
+const Notifications = (() => {
+
+  function isSupported() {
+    return 'Notification' in window;
+  }
+
+  async function request() {
+    if (!isSupported()) {
+      UI.toast('Prohlížeč nepodporuje push notifikace');
+      return false;
+    }
+    const perm = await Notification.requestPermission();
+    App.pushEnabled = (perm === 'granted');
+    await Storage.setPushEnabled(App.pushEnabled);
+
+    if (App.pushEnabled) {
+      UI.toast('✓ Push notifikace aktivní');
+      checkAndNotify();
+    } else {
+      UI.toast('Notifikace byly zamítnuty v prohlížeči');
+    }
+    return App.pushEnabled;
+  }
+
+  async function disable() {
+    App.pushEnabled = false;
+    await Storage.setPushEnabled(false);
+    UI.toast('Notifikace vypnuty');
+  }
+
+  function send(title, body) {
+    if (!App.pushEnabled || Notification.permission !== 'granted') return;
+    new Notification(title, {
+      body,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🧠</text></svg>'
+    });
+  }
+
+  /**
+   * Projde účtenky a pošle notifikaci pro ty, jimž záruka vyprší do 30 dní.
+   * Volá se při startu aplikace a při aktivaci notifikací.
+   */
+  function checkAndNotify() {
+    if (!App.pushEnabled) return;
+
+    const expiring = App.receipts.filter(r => {
+      const d = Warranty.daysLeft(r);
+      return d !== null && d >= 0 && d <= 30;
+    });
+
+    // Odesílej s malým zpožděním, aby nedošlo k zahlcení
+    expiring.forEach((r, idx) => {
+      const d = Warranty.daysLeft(r);
+      setTimeout(() => {
+        send('⏰ Záruční lhůta brzy vyprší', `${r.name} — zbývá ${d} dní`);
+      }, idx * 600);
+    });
+  }
+
+  async function toggle() {
+    if (App.pushEnabled) {
+      await disable();
+    } else {
+      await request();
+    }
+    Profile.render();
+  }
+
+  return { isSupported, request, disable, send, checkAndNotify, toggle };
+})();
+
+// js/profile.js — profil uživatele, statistiky, export/import
+
+const Profile = (() => {
+
+  function render() {
+    if (!App.user) return;
+
+    const initials  = App.user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const greens    = App.items.filter(i => i.light === 'green').length;
+    const reds      = App.items.filter(i => i.light === 'red').length;
+    const expiring  = App.receipts.filter(r => { const d = Warranty.daysLeft(r); return d !== null && d >= 0 && d <= 30; }).length;
+    const pn        = App.pushEnabled;
+
+    document.getElementById('profileContent').innerHTML = `
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="profile-avatar">${initials}</div>
+        <div style="font-size:20px;font-weight:700">${App.user.name}</div>
+        <div style="font-size:14px;color:var(--c-muted)">${App.user.email}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-num">${App.receipts.length}</div><div class="stat-label">Účtenek</div></div>
+        <div class="stat-card"><div class="stat-num">${App.items.length}</div><div class="stat-label">Položek</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--c-green)">${greens}</div><div class="stat-label">Super produktů</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:${expiring ? 'var(--c-amber)' : 'var(--c-accent)'}">${expiring}</div><div class="stat-label">Záruky brzy</div></div>
+      </div>
+
+      <div style="font-size:12px;color:var(--c-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">🔔 Notifikace</div>
+      <div class="card" style="margin-bottom:16px" onclick="Notifications.toggle()">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="push-dot ${pn ? 'on' : 'off'}"></div>
+          <div>
+            <div style="font-weight:600">Push notifikace</div>
+            <div style="font-size:13px;color:var(--c-muted)">${pn ? 'Aktivní — záruky do 30 dní' : 'Klikni pro aktivaci'}</div>
+          </div>
+          <div style="margin-left:auto;font-size:13px;font-weight:600;color:${pn ? 'var(--c-green)' : 'var(--c-muted)'}">${pn ? 'ZAP' : 'VYP'}</div>
+        </div>
+      </div>
+
+      <div style="font-size:12px;color:var(--c-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">☁️ Záloha & Export</div>
+
+      <button class="gdrive-btn profile-card" onclick="Storage.exportJSON()">
+        <div class="profile-card-icon" style="background:rgba(74,222,128,0.1)">📤</div>
+        <div class="profile-card-body"><strong>Export dat (JSON)</strong><span>Stáhnout zálohu do zařízení</span></div>
+      </button>
+
+      <button class="profile-card" onclick="toggleImport()">
+        <div class="profile-card-icon" style="background:rgba(167,139,250,0.1)">📥</div>
+        <div class="profile-card-body"><strong>Import dat</strong><span>Obnovit nebo sloučit ze zálohy</span></div>
+      </button>
+
+      <div class="import-area" id="importArea" style="display:none">
+        <input type="file" accept=".json" id="importInput" onchange="Profile.doImport()" />
+        <p>Vyber soubor pamet-export-*.json</p>
+      </div>
+
+      <button class="profile-card" onclick="Profile.exportGDriveHelp()" style="margin-top:2px">
+        <div class="profile-card-icon" style="background:rgba(66,133,244,0.1)">🔵</div>
+        <div class="profile-card-body"><strong>Google Drive záloha</strong><span>Exportuj a nahraj ručně na Drive</span></div>
+      </button>
+
+      <div style="margin-top:20px">
+        <button class="btn btn-danger" style="width:100%" onclick="Auth.logout()">Odhlásit se</button>
+      </div>
+
+      <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--c-muted)">
+        Paměť v${App.VERSION} · Data jsou uložena pouze v tomto prohlížeči
+      </div>
+    `;
+  }
+
+  function toggleImport() {
+    const area = document.getElementById('importArea');
+    if (area) area.style.display = area.style.display === 'none' ? 'block' : 'none';
+  }
+
+  async function doImport() {
+    const file = document.getElementById('importInput')?.files[0];
+    if (!file) return;
+    try {
+      const result = await Storage.importJSON(file);
+      Receipts.render(); Receipts.buildFilters(); Receipts.checkExpiryBanner();
+      Items.render(); Warranty_Tab.render(); render();
+      UI.toast(`✓ Import: +${result.receipts} účtenek, +${result.items} položek`);
+    } catch (e) {
+      UI.toast('Chyba: ' + e.message);
+    }
+  }
+
+  function exportGDriveHelp() {
+    Storage.exportJSON();
+    setTimeout(() => {
+      UI.toast('Soubor stažen — nahraj jej na drive.google.com', 4500);
+    }, 400);
+  }
+
+  return { render, toggleImport, doImport, exportGDriveHelp };
+})();
+
+// js/app.js — vstupní bod aplikace, globální stav
+
+const App = {
+  VERSION: '2.0.0',
+  user: null,
+  receipts: [],
+  items: [],
+  pushEnabled: false,
+
+  /**
+   * Spustí aplikaci po přihlášení — načte data a vykreslí UI.
+   */
+  async boot() {
+    document.getElementById('loginScreen').style.display  = 'none';
+    document.getElementById('appScreen').style.display    = 'block';
+
+    App.receipts    = await Storage.getReceipts();
+    App.items       = await Storage.getItems();
+    App.pushEnabled = await Storage.getPushEnabled();
+
+    document.getElementById('headerSub').textContent = 'Ahoj, ' + App.user.name + '!';
+
+    Receipts.buildFilters();
+    Receipts.render();
+    Receipts.checkExpiryBanner();
+    Items.buildFilters();
+    Items.render();
+    Warranty_Tab.render();
+
+    if (App.pushEnabled) {
+      Notifications.checkAndNotify();
+    }
+  }
+};
+
+// Inicializace — zkontroluje uložené přihlášení
+(async () => {
+  const savedUser = await Storage.getUser();
+  if (savedUser) {
+    App.user = savedUser;
+    await App.boot();
+  }
+})();
+
+// Nastav dnešní datum jako výchozí pro formulář
+document.addEventListener('DOMContentLoaded', () => {
+  const rDate = document.getElementById('rDate');
+  if (rDate) rDate.value = new Date().toISOString().split('T')[0];
+});
+
+
+</script>
 </body>
 </html>
