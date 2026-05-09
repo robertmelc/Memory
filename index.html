@@ -455,21 +455,38 @@ document.getElementById('loginBtn').addEventListener('click', async function() {
   const email = document.getElementById('loginEmail').value.trim();
   if (!name)  { toast('Zadej jméno'); return; }
   if (!email || !email.includes('@')) { toast('Zadej platný e-mail'); return; }
-  user = { name, email, created: Date.now() };
-  await localforage.setItem('user', user);
-  await bootApp();
+  this.textContent = 'Načítám...';
+  this.disabled = true;
+  try {
+    user = { name, email, created: Date.now() };
+    await localforage.setItem('user', user);
+    await bootApp();
+  } catch(e) {
+    console.error('Login error:', e);
+    toast('Chyba: ' + e.message);
+    this.textContent = 'Začít používat →';
+    this.disabled = false;
+  }
 });
 
 async function bootApp() {
-  receipts = (await localforage.getItem(storageKey('receipts'))) || [];
-  items    = (await localforage.getItem(storageKey('items')))    || [];
-  pushEnabled = (await localforage.getItem(storageKey('push')))  || false;
+  try {
+    receipts    = (await localforage.getItem(storageKey('receipts'))) || [];
+    items       = (await localforage.getItem(storageKey('items')))    || [];
+    pushEnabled = (await localforage.getItem(storageKey('push')))     || false;
+  } catch(e) {
+    console.warn('Storage load error:', e);
+    receipts = []; items = []; pushEnabled = false;
+  }
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display   = 'block';
   document.getElementById('headerSub').textContent = 'Ahoj, ' + user.name + '!';
-  buildReceiptFilters(); renderReceipts(); checkExpiryBanner();
-  buildItemFilters();    renderItems();
-  if (pushEnabled) checkAndNotify();
+  try { buildReceiptFilters(); } catch(e) { console.warn(e); }
+  try { renderReceipts(); }     catch(e) { console.warn(e); document.getElementById('receiptList').innerHTML = '<div class="empty">Chyba načítání — zkus obnovit stránku.</div>'; }
+  try { checkExpiryBanner(); }  catch(e) { console.warn(e); }
+  try { buildItemFilters(); }   catch(e) { console.warn(e); }
+  try { renderItems(); }        catch(e) { console.warn(e); document.getElementById('itemList').innerHTML = '<div class="empty">Chyba načítání.</div>'; }
+  if (pushEnabled) try { checkAndNotify(); } catch(e) { console.warn(e); }
 }
 
 function logout() {
