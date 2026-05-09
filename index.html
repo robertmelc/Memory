@@ -678,7 +678,7 @@ function showReceiptDetail(id) {
   const photos = r.photos && r.photos.length ? r.photos : (r.photo ? [r.photo] : []);
   const photosHtml = photos.length ?
     '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px">' +
-    photos.map((p,i) => '<img src="' + p + '" class="photo-full" style="height:100px;border-radius:10px;object-fit:cover;cursor:pointer;margin:0" onclick="viewPhotoUrl('' + p + '')" alt="foto ' + (i+1) + '" />').join('') +
+    photos.map((p,i) => '<img src="' + p + '" style="height:100px;width:100%;border-radius:10px;object-fit:cover;cursor:pointer" onclick="viewPhotoUrl(this.src)" alt="foto" />').join('') +
     '</div>' : '';
   document.getElementById('rDetailContent').innerHTML =
     photosHtml +
