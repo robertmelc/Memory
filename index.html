@@ -520,10 +520,14 @@ function renderReceipts() {
     el.innerHTML = '<div class="empty">' + (receipts.length ? 'Žádné výsledky' : 'Zatím žádná účtenka.<br>Klikni + a přidej první.') + '</div>';
     return;
   }
-  el.innerHTML = list.map(r =>
-    '<div class="card" onclick="showReceiptDetail(\'' + r.id + '\')">' +
+  el.innerHTML = list.map(r => {
+    const rPhotos = r.photos && r.photos.length ? r.photos : (r.photo ? [r.photo] : []);
+    const thumbHtml = rPhotos.length
+      ? '<img src="' + rPhotos[0] + '" alt="foto" />' + (rPhotos.length > 1 ? '<div style="position:absolute;bottom:2px;right:2px;background:rgba(108,92,231,0.85);color:white;font-size:9px;font-weight:700;border-radius:8px;padding:1px 5px">+' + (rPhotos.length-1) + '</div>' : '')
+      : '🧾';
+    return '<div class="card" onclick="showReceiptDetail(\'' + r.id + '\')">' +
       '<div class="card-row">' +
-        '<div class="card-thumb">' + (r.photo ? '<img src="' + r.photo + '" alt="foto" />' : '🧾') + '</div>' +
+        '<div class="card-thumb" style="position:relative">' + thumbHtml + '</div>' +
         '<div class="card-body">' +
           '<div class="card-title">' + r.name + '</div>' +
           '<div class="card-meta">' + (r.purchaseDate ? new Date(r.purchaseDate+'T12:00:00').toLocaleDateString('cs-CZ') : 'Datum neuvedeno') + '</div>' +
@@ -534,8 +538,7 @@ function renderReceipts() {
           '</div>' +
         '</div>' +
       '</div>' +
-    '</div>'
-  };
+    '</div>';
   }).join('');
 }
 
