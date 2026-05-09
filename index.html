@@ -93,11 +93,15 @@ body::after{content:'';position:fixed;bottom:-10%;right:-10%;width:50vw;height:5
 .btn-secondary{background:rgba(108,92,231,0.08);color:var(--a-violet);border:1.5px solid rgba(108,92,231,0.15)}
 .btn-danger{background:rgba(255,107,107,0.10);color:#c0392b;border:1.5px solid rgba(255,107,107,0.20)}
 /* PHOTO */
-.photo-upload{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#eae6ff,#dceefb);border:2px dashed rgba(108,92,231,0.25);border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;position:relative;overflow:hidden}
-.photo-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
-.photo-upload img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.photo-upload svg{width:28px;height:28px;stroke:var(--a-violet);opacity:0.7;fill:none}
-.photo-upload span{font-size:13px;color:var(--a-violet);font-weight:500}
+.photo-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.photo-thumb{aspect-ratio:1;border-radius:var(--r-sm);overflow:hidden;position:relative;background:linear-gradient(135deg,#eae6ff,#dceefb);border:1px solid rgba(255,255,255,0.9)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-thumb-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(255,107,107,0.85);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:white;font-weight:700}
+.photo-add{aspect-ratio:1;border-radius:var(--r-sm);background:linear-gradient(135deg,#eae6ff,#dceefb);border:2px dashed rgba(108,92,231,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;position:relative}
+.photo-add input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.photo-add svg{width:22px;height:22px;stroke:var(--a-violet);opacity:0.7;fill:none}
+.photo-add span{font-size:11px;color:var(--a-violet);font-weight:500}
+.photo-full{width:100%;height:200px;object-fit:cover;border-radius:var(--r-sm);margin-bottom:6px;cursor:pointer}
 /* WARRANTY FORM SECTION */
 .wsec{background:linear-gradient(135deg,rgba(108,92,231,0.06),rgba(0,184,148,0.06));border:1.5px solid rgba(108,92,231,0.15);border-radius:var(--r-sm);padding:14px;margin-bottom:14px}
 .wsec-title{font-size:12px;color:var(--a-violet);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
@@ -282,11 +286,7 @@ body::after{content:'';position:fixed;bottom:-10%;right:-10%;width:50vw;height:5
     <h2 id="receiptModalTitle">Nová účtenka</h2>
     <div class="field">
       <label>Fotografie</label>
-      <div class="photo-upload" id="photoBox">
-        <input type="file" accept="image/*" id="photoInput" />
-        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span>Vyfotit nebo vybrat z galerie</span>
-      </div>
+      <div class="photo-gallery" id="photoGallery"></div>
       <input type="hidden" id="photoData" />
     </div>
     <div class="field"><label>Název</label><input type="text" id="rName" placeholder="Co je na účtence?" /></div>
@@ -535,7 +535,8 @@ function renderReceipts() {
         '</div>' +
       '</div>' +
     '</div>'
-  ).join('');
+  };
+  }).join('');
 }
 
 // ── ADD / EDIT RECEIPT ─────────────────────────────────────
@@ -546,31 +547,69 @@ function openAddReceipt() {
   document.getElementById('rDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('rWUnit').value = 'months';
   document.getElementById('wPrev').textContent = '';
-  clearPhotoBox();
+  currentPhotos = [];
+  renderPhotoGallery();
   openModal('receipt');
 }
 
 function clearPhotoBox() {
-  const box = document.getElementById('photoBox');
-  const img = box.querySelector('img'); if (img) img.remove();
-  const svg = box.querySelector('svg'); if (svg) svg.style.display = '';
-  const sp  = box.querySelector('span'); if (sp) sp.style.display = '';
+  currentPhotos = [];
+  renderPhotoGallery();
 }
 
-document.getElementById('photoInput').addEventListener('change', function() {
-  const file = this.files[0]; if (!file) return;
+// Multi-photo support
+let currentPhotos = []; // array of base64 strings
+
+function renderPhotoGallery() {
+  const gallery = document.getElementById('photoGallery');
+  if (!gallery) return;
+  let html = currentPhotos.map((p, i) =>
+    '<div class="photo-thumb">' +
+      '<img src="' + p + '" alt="foto ' + (i+1) + '" onclick="viewPhoto(' + i + ')" />' +
+      '<button class="photo-thumb-del" onclick="removePhoto(' + i + ')">×</button>' +
+    '</div>'
+  ).join('');
+  // Add button (max 6 photos)
+  if (currentPhotos.length < 6) {
+    html += '<div class="photo-add">' +
+      '<input type="file" accept="image/*" onchange="addPhoto(this)" />' +
+      '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' +
+      '<span>' + (currentPhotos.length === 0 ? 'Přidat foto' : '+') + '</span>' +
+    '</div>';
+  }
+  gallery.innerHTML = html;
+  document.getElementById('photoData').value = JSON.stringify(currentPhotos);
+}
+
+function addPhoto(input) {
+  const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const box = document.getElementById('photoBox');
-    let img = box.querySelector('img');
-    if (!img) { img = document.createElement('img'); box.appendChild(img); }
-    img.src = e.target.result;
-    const svg = box.querySelector('svg'); if (svg) svg.style.display = 'none';
-    const sp  = box.querySelector('span'); if (sp) sp.style.display = 'none';
-    document.getElementById('photoData').value = e.target.result;
+    currentPhotos.push(e.target.result);
+    renderPhotoGallery();
   };
   reader.readAsDataURL(file);
-});
+}
+
+function removePhoto(idx) {
+  currentPhotos.splice(idx, 1);
+  renderPhotoGallery();
+}
+
+function viewPhoto(idx) {
+  viewPhotoUrl(currentPhotos[idx]);
+}
+
+function viewPhotoUrl(src) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.onclick = () => overlay.remove();
+  const img = document.createElement('img');
+  img.src = src;
+  img.style.cssText = 'max-width:95vw;max-height:90vh;border-radius:12px;object-fit:contain';
+  overlay.appendChild(img);
+  document.body.appendChild(overlay);
+}
 
 function updateWPreview() {
   const len  = document.getElementById('rWLen').value;
@@ -594,7 +633,8 @@ document.getElementById('saveReceipt').addEventListener('click', async function(
   const editId = document.getElementById('editRId').value;
   const r = {
     id: editId || Date.now().toString(), name,
-    photo: document.getElementById('photoData').value,
+    photo: currentPhotos[0] || '',
+    photos: [...currentPhotos],
     keywords: document.getElementById('rKeywords').value,
     location: document.getElementById('rLocation').value,
     purchaseDate: document.getElementById('rDate').value,
@@ -615,8 +655,13 @@ document.getElementById('saveReceipt').addEventListener('click', async function(
 function showReceiptDetail(id) {
   const r = receipts.find(x => x.id === id); if (!r) return;
   const d = wDaysLeft(r), pct = wPercent(r), fc = wFillColor(d);
+  const photos = r.photos && r.photos.length ? r.photos : (r.photo ? [r.photo] : []);
+  const photosHtml = photos.length ?
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px">' +
+    photos.map((p,i) => '<img src="' + p + '" class="photo-full" style="height:100px;border-radius:10px;object-fit:cover;cursor:pointer;margin:0" onclick="viewPhotoUrl('' + p + '')" alt="foto ' + (i+1) + '" />').join('') +
+    '</div>' : '';
   document.getElementById('rDetailContent').innerHTML =
-    (r.photo ? '<img src="' + r.photo + '" class="dphoto" alt="foto" />' : '') +
+    photosHtml +
     '<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">' + r.name + '</h2>' +
     (r.purchaseDate ? '<div class="dsec"><h3>Datum nákupu</h3><div class="dval">' + new Date(r.purchaseDate+'T12:00:00').toLocaleDateString('cs-CZ') + '</div></div>' : '') +
     (r.wLen ? '<div class="dsec"><h3>Záruka</h3>' + wBadge(r) +
@@ -643,16 +688,8 @@ function editReceipt(id) {
   document.getElementById('rWLen').value       = r.wLen        || '';
   document.getElementById('rWUnit').value      = r.wUnit       || 'months';
   document.getElementById('rNote').value       = r.note        || '';
-  document.getElementById('photoData').value   = r.photo       || '';
-  clearPhotoBox();
-  if (r.photo) {
-    const box = document.getElementById('photoBox');
-    let img = box.querySelector('img');
-    if (!img) { img = document.createElement('img'); box.appendChild(img); }
-    img.src = r.photo;
-    const svg = box.querySelector('svg'); if (svg) svg.style.display = 'none';
-    const sp  = box.querySelector('span'); if (sp) sp.style.display = 'none';
-  }
+  currentPhotos = r.photos ? [...r.photos] : (r.photo ? [r.photo] : []);
+  renderPhotoGallery();
   updateWPreview();
   openModal('receipt');
 }
