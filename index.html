@@ -362,9 +362,9 @@ body::after{content:'';position:fixed;bottom:-10%;right:-10%;width:50vw;height:5
     <div class="modal-handle"></div>
     <div id="iDetailContent"></div>
     <div class="btn-row">
-      <button class="btn btn-secondary" id="closeIDetail">Zavřít</button>
-      <button class="btn btn-secondary" id="editIBtn">Upravit</button>
-      <button class="btn btn-danger" id="deleteIBtn">Smazat</button>
+      <button class="btn btn-secondary" onclick="closeModal('idetail')">Zavřít</button>
+      <button class="btn btn-secondary" id="editIBtn" onclick="">Upravit</button>
+      <button class="btn btn-danger" id="deleteIBtn" onclick="">Smazat</button>
     </div>
   </div>
 </div>
@@ -792,7 +792,6 @@ function showItemDetail(id) {
   };
   openModal('idetail');
 }
-document.getElementById('closeIDetail').addEventListener('click', () => closeModal('idetail'));
 
 function editItem(id) {
   const i = items.find(x => x.id === id); if (!i) return;
