@@ -318,6 +318,11 @@ body::after{content:'';position:fixed;bottom:-10%;right:-10%;width:50vw;height:5
     <div class="modal-handle"></div>
     <h2>Nová položka</h2>
     <div class="field"><label>Název produktu</label><input type="text" id="iName" placeholder="Krmivo Whiskas losos..." /></div>
+    <div class="field">
+      <label>Fotografie</label>
+      <div class="photo-gallery" id="itemPhotoGallery"></div>
+      <input type="hidden" id="iPhotoData" />
+    </div>
     <div class="field"><label>Kategorie</label>
       <select id="iCat">
         <option value="kuchyn">🍳 Kuchyň</option>
@@ -504,10 +509,12 @@ function logout() {
 // ── FAB ────────────────────────────────────────────────────
 document.getElementById('fabReceipt').addEventListener('click', openAddReceipt);
 document.getElementById('fabItem').addEventListener('click', function() {
-  document.getElementById('iName').value  = '';
-  document.getElementById('iNote').value  = '';
+  document.getElementById('iName').value   = '';
+  document.getElementById('iNote').value   = '';
   document.getElementById('editIId').value = '';
   document.querySelector('#modal-item h2').textContent = 'Nová položka';
+  currentItemPhotos = [];
+  renderItemPhotoGallery();
   setLight('red');
   openModal('item');
 });
@@ -599,6 +606,38 @@ function renderPhotoGallery() {
   }
   gallery.innerHTML = html;
   document.getElementById('photoData').value = JSON.stringify(currentPhotos);
+}
+
+function renderItemPhotoGallery() {
+  const gallery = document.getElementById('itemPhotoGallery');
+  if (!gallery) return;
+  let html = currentItemPhotos.map((p, i) =>
+    '<div class="photo-thumb">' +
+      '<img src="' + p + '" alt="foto" onclick="viewPhotoUrl(this.src)" />' +
+      '<button class="photo-thumb-del" onclick="removeItemPhoto(' + i + ')">×</button>' +
+    '</div>'
+  ).join('');
+  if (currentItemPhotos.length < 6) {
+    html += '<div class="photo-add">' +
+      '<input type="file" accept="image/*" onchange="addItemPhoto(this)" />' +
+      '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' +
+      '<span>' + (currentItemPhotos.length === 0 ? 'Přidat foto' : '+') + '</span>' +
+    '</div>';
+  }
+  gallery.innerHTML = html;
+  document.getElementById('iPhotoData').value = JSON.stringify(currentItemPhotos);
+}
+
+function addItemPhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { currentItemPhotos.push(e.target.result); renderItemPhotoGallery(); };
+  reader.readAsDataURL(file);
+}
+
+function removeItemPhoto(idx) {
+  currentItemPhotos.splice(idx, 1);
+  renderItemPhotoGallery();
 }
 
 function addPhoto(input) {
@@ -817,9 +856,11 @@ document.getElementById('saveItem').addEventListener('click', async function() {
   const item = {
     id: editId || Date.now().toString(),
     name,
-    cat:   document.getElementById('iCat').value,
-    light: document.getElementById('iLight').value,
-    note:  document.getElementById('iNote').value,
+    cat:    document.getElementById('iCat').value,
+    light:  document.getElementById('iLight').value,
+    note:   document.getElementById('iNote').value,
+    photo:  currentItemPhotos[0] || '',
+    photos: [...currentItemPhotos],
     created: editId ? (items.find(x=>x.id===editId)?.created || Date.now()) : Date.now()
   };
   if (editId) {
@@ -833,11 +874,18 @@ document.getElementById('saveItem').addEventListener('click', async function() {
 });
 
 let currentItemId = null;
+let currentItemPhotos = [];
 
 function showItemDetail(id) {
   const i = items.find(x => x.id === id); if (!i) return;
   currentItemId = id;
+  const iPhotos = i.photos && i.photos.length ? i.photos : (i.photo ? [i.photo] : []);
+  const iPhotosHtml = iPhotos.length
+    ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px">' +
+      iPhotos.map(p => '<img src="' + p + '" style="height:100px;width:100%;border-radius:10px;object-fit:cover;cursor:pointer" onclick="viewPhotoUrl(this.src)" alt="foto" />').join('') +
+      '</div>' : '';
   document.getElementById('iDetailContent').innerHTML =
+    iPhotosHtml +
     '<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">' + i.name + '</h2>' +
     '<div class="dsec"><h3>Kategorie</h3><span class="cpill cat-' + i.cat + '">' + CATS[i.cat] + '</span></div>' +
     '<div class="dsec"><h3>Hodnocení</h3><div style="display:flex;align-items:center;gap:10px"><div style="width:14px;height:14px;border-radius:50%;background:' + LIGHTS[i.light]?.color + '"></div><span style="font-size:16px;font-weight:600;color:' + LIGHTS[i.light]?.color + '">' + LIGHTS[i.light]?.label + '</span></div></div>' +
@@ -860,11 +908,13 @@ function editCurrentItem() {
 
 function editItem(id) {
   const i = items.find(x => x.id === id); if (!i) return;
-  document.getElementById('iName').value = i.name  || '';
-  document.getElementById('iCat').value  = i.cat   || 'kuchyn';
-  document.getElementById('iNote').value = i.note  || '';
+  document.getElementById('iName').value   = i.name || '';
+  document.getElementById('iCat').value    = i.cat  || 'kuchyn';
+  document.getElementById('iNote').value   = i.note || '';
   document.getElementById('editIId').value = id;
   document.querySelector('#modal-item h2').textContent = 'Upravit položku';
+  currentItemPhotos = i.photos && i.photos.length ? [...i.photos] : (i.photo ? [i.photo] : []);
+  renderItemPhotoGallery();
   setLight(i.light || 'red');
   openModal('item');
 }
