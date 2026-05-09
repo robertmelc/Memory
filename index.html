@@ -339,6 +339,7 @@ body::after{content:'';position:fixed;bottom:-10%;right:-10%;width:50vw;height:5
     </div>
     <div class="field"><label>Poznámka</label><textarea id="iNote" placeholder="Proč nekupovat / co nevyhovuje..."></textarea></div>
     <input type="hidden" id="iLight" value="red" />
+    <input type="hidden" id="editIId" value="" />
     <div class="btn-row">
       <button class="btn btn-secondary" id="cancelItem">Zrušit</button>
       <button class="btn btn-primary" id="saveItem">Uložit</button>
@@ -362,6 +363,7 @@ body::after{content:'';position:fixed;bottom:-10%;right:-10%;width:50vw;height:5
     <div id="iDetailContent"></div>
     <div class="btn-row">
       <button class="btn btn-secondary" id="closeIDetail">Zavřít</button>
+      <button class="btn btn-secondary" id="editIBtn">Upravit</button>
       <button class="btn btn-danger" id="deleteIBtn">Smazat</button>
     </div>
   </div>
@@ -485,8 +487,10 @@ function logout() {
 // ── FAB ────────────────────────────────────────────────────
 document.getElementById('fabReceipt').addEventListener('click', openAddReceipt);
 document.getElementById('fabItem').addEventListener('click', function() {
-  document.getElementById('iName').value = '';
-  document.getElementById('iNote').value = '';
+  document.getElementById('iName').value  = '';
+  document.getElementById('iNote').value  = '';
+  document.getElementById('editIId').value = '';
+  document.querySelector('#modal-item h2').textContent = 'Nová položka';
   setLight('red');
   openModal('item');
 });
@@ -752,7 +756,21 @@ document.getElementById('cancelItem').addEventListener('click', () => closeModal
 document.getElementById('saveItem').addEventListener('click', async function() {
   const name = document.getElementById('iName').value.trim();
   if (!name) { toast('Zadej název'); return; }
-  items.unshift({ id: Date.now().toString(), name, cat: document.getElementById('iCat').value, light: document.getElementById('iLight').value, note: document.getElementById('iNote').value, created: Date.now() });
+  const editId = document.getElementById('editIId').value;
+  const item = {
+    id: editId || Date.now().toString(),
+    name,
+    cat:   document.getElementById('iCat').value,
+    light: document.getElementById('iLight').value,
+    note:  document.getElementById('iNote').value,
+    created: editId ? (items.find(x=>x.id===editId)?.created || Date.now()) : Date.now()
+  };
+  if (editId) {
+    items = items.map(x => x.id === editId ? item : x);
+  } else {
+    items.unshift(item);
+  }
+  document.getElementById('editIId').value = '';
   await saveItems();
   closeModal('item'); toast('Uloženo!'); renderItems(); renderProfile();
 });
@@ -768,9 +786,24 @@ function showItemDetail(id) {
     items = items.filter(x => x.id !== id);
     await saveItems(); closeModal('idetail'); renderItems(); renderProfile(); toast('Smazáno');
   };
+  document.getElementById('editIBtn').onclick = () => {
+    closeModal('idetail');
+    editItem(id);
+  };
   openModal('idetail');
 }
 document.getElementById('closeIDetail').addEventListener('click', () => closeModal('idetail'));
+
+function editItem(id) {
+  const i = items.find(x => x.id === id); if (!i) return;
+  document.getElementById('iName').value = i.name  || '';
+  document.getElementById('iCat').value  = i.cat   || 'kuchyn';
+  document.getElementById('iNote').value = i.note  || '';
+  document.getElementById('editIId').value = id;
+  document.querySelector('#modal-item h2').textContent = 'Upravit položku';
+  setLight(i.light || 'red');
+  openModal('item');
+}
 
 // ── PUSH NOTIFICATIONS ──────────────────────────────────────
 async function togglePush() {
