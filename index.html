@@ -363,8 +363,8 @@ body::after{content:'';position:fixed;bottom:-10%;right:-10%;width:50vw;height:5
     <div id="iDetailContent"></div>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="closeModal('idetail')">Zavřít</button>
-      <button class="btn btn-secondary" id="editIBtn" onclick="">Upravit</button>
-      <button class="btn btn-danger" id="deleteIBtn" onclick="">Smazat</button>
+      <button class="btn btn-secondary" onclick="editCurrentItem()">Upravit</button>
+      <button class="btn btn-danger" onclick="deleteCurrentItem()">Smazat</button>
     </div>
   </div>
 </div>
@@ -775,22 +775,30 @@ document.getElementById('saveItem').addEventListener('click', async function() {
   closeModal('item'); toast('Uloženo!'); renderItems(); renderProfile();
 });
 
+let currentItemId = null;
+
 function showItemDetail(id) {
   const i = items.find(x => x.id === id); if (!i) return;
+  currentItemId = id;
   document.getElementById('iDetailContent').innerHTML =
     '<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">' + i.name + '</h2>' +
     '<div class="dsec"><h3>Kategorie</h3><span class="cpill cat-' + i.cat + '">' + CATS[i.cat] + '</span></div>' +
     '<div class="dsec"><h3>Hodnocení</h3><div style="display:flex;align-items:center;gap:10px"><div style="width:14px;height:14px;border-radius:50%;background:' + LIGHTS[i.light]?.color + '"></div><span style="font-size:16px;font-weight:600;color:' + LIGHTS[i.light]?.color + '">' + LIGHTS[i.light]?.label + '</span></div></div>' +
     (i.note ? '<div class="dsec"><h3>Poznámka</h3><div class="dval" style="color:var(--t-muted)">' + i.note + '</div></div>' : '');
-  document.getElementById('deleteIBtn').onclick = async () => {
-    items = items.filter(x => x.id !== id);
-    await saveItems(); closeModal('idetail'); renderItems(); renderProfile(); toast('Smazáno');
-  };
-  document.getElementById('editIBtn').onclick = () => {
-    closeModal('idetail');
-    editItem(id);
-  };
   openModal('idetail');
+}
+
+async function deleteCurrentItem() {
+  if (!currentItemId) return;
+  items = items.filter(x => x.id !== currentItemId);
+  await saveItems(); closeModal('idetail'); renderItems(); renderProfile(); toast('Smazáno');
+  currentItemId = null;
+}
+
+function editCurrentItem() {
+  if (!currentItemId) return;
+  closeModal('idetail');
+  editItem(currentItemId);
 }
 
 function editItem(id) {
